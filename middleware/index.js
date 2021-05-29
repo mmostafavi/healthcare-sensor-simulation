@@ -18,7 +18,7 @@ app.get('/', function (req, res) {
 })
 
 var dataPusher = setInterval(function () {
-  request.get(`http://[${process.env.sensorIP}]/`, function (err, res, body) {
+  request.get(`http://[${process.env.SensorIP}]/`, function (err, res, body) {
     if (err) {
       console.log(err)
       return
@@ -40,9 +40,7 @@ mongoose.set('useFindAndModify', false)
 mongoose.set('useCreateIndex', true)
 mongoose.set('useUnifiedTopology', true)
 mongoose
-  .connect(
-    `mongodb+srv://${process.env.dbUser}:${process.env.dbPassword}@cluster0.fuyyc.mongodb.net/${process.env.defaultDB}?retryWrites=true&w=majority`
-  )
+  .connect(process.env.dbConnectionString)
   .then((res) => {
     console.log(`server is listening at port ${process.env.PORT}`)
     app.listen(process.env.PORT)
