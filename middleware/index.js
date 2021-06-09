@@ -7,9 +7,10 @@ const mongoose = require('mongoose')
 const { Schema } = require('mongoose')
 const sensorSchema = new Schema({
   temperature: Number,
-  humidity: Number,
   registrationDate: Date,
 })
+
+import dataInspector from './data-inspector'
 
 const SensorModel = mongoose.model('sensor', sensorSchema)
 
@@ -17,22 +18,28 @@ app.get('/', function (req, res) {
   res.send('WebSense DB')
 })
 
-var dataPusher = setInterval(function () {
-  request.get(`http://[${process.env.SensorIP}]/`, function (err, res, body) {
-    if (err) {
-      console.log(err)
-      return
-    }
-    var obj = JSON.parse(body)
-    console.log(obj)
-    let sensorDoc = new SensorModel({
-      temperature: obj.temp,
-      humidity: obj.hum,
-      registrationDate: new Date.UTC(),
-    })
+var dataPusher = setInterval(async function () {
+  await request.get(
+    `http://[${process.env.SensorIP}]/`,
+    // --------------------------------
+    // change the ip address from line above if .env files are hidden
+    // --------------------------------
+    function (err, res, body) {
+      if (err) {
+        console.log(err)
+        return
+      }
 
-    sensorDoc.save()
-  })
+      let [lightSensor, tempSensor] = dataInspector(body)
+
+      let sensorDoc = new SensorModel({
+        temperature: tempSensor,
+        registrationDate: new Date.UTC(),
+      })
+
+      await sensorDoc.save()
+    }
+  )
 }, 5000)
 
 mongoose.set('useNewUrlParser', true)
