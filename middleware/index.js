@@ -10,7 +10,8 @@ const sensorSchema = new Schema({
   registrationDate: Date,
 })
 
-import dataInspector from './data-inspector'
+const dataInspector = require('./data-inspector')
+
 
 const SensorModel = mongoose.model('sensor', sensorSchema)
 
@@ -24,7 +25,7 @@ var dataPusher = setInterval(async function () {
     // --------------------------------
     // change the ip address from line above if .env files are hidden
     // --------------------------------
-    function (err, res, body) {
+    async function (err, res, body) {
       if (err) {
         console.log(err)
         return
@@ -34,7 +35,7 @@ var dataPusher = setInterval(async function () {
 
       let sensorDoc = new SensorModel({
         temperature: tempSensor,
-        registrationDate: new Date.UTC(),
+        registrationDate: new Date().toISOString(),
       })
 
       await sensorDoc.save()
